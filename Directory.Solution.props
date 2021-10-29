@@ -1,0 +1,10 @@
+<Project>
+
+    <!--  bzl:generated start  -->
+    <PropertyGroup>
+        <BazelProjectUseSolutionItems>true</BazelProjectUseSolutionItems>
+    </PropertyGroup>
+    <Import Project="Bazel.props" />
+    <!--  bzl:generated end  -->
+
+</Project>

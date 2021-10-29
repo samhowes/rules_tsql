@@ -1,0 +1,3 @@
+CREATE TABLE [Foo].[Bar] (
+    Id INT NOT NULL IDENTITY (1,1)
+)

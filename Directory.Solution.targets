@@ -1,0 +1,12 @@
+<Project>
+
+    <!--  bzl:generated start  -->
+    <Import Condition="'$(UseBazel)' == 'true'" Project="Bazel.targets"/>
+
+    <Target Condition="'$(UseBazel)' == 'true'" Name="BazelClean"
+        AfterTargets="Clean">
+        <Exec Command="bazel clean" />
+    </Target>
+    <!--  bzl:generated end  -->
+
+</Project>

@@ -1,0 +1,14 @@
+<Project>
+
+    <!--  bzl:generated start  -->
+    <PropertyGroup>
+        <!--  Set to false to have your ide build without Bazel. Useful for debugging.
+            Files will be output to //dotnet-bin instead of //bazel-bin
+        -->
+        <UseBazel>true</UseBazel>
+    </PropertyGroup>
+    <!-- Only import Bazel.props when bazel isn't controlling msbuild. -->
+    <Import Condition="$(BazelBuild) == ''" Project="Bazel.props"/>
+    <!--  bzl:generated end  -->
+
+</Project>

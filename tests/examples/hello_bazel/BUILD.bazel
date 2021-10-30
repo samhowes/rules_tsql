@@ -1,6 +1,38 @@
 load("@rules_tsql//tsql:defs.bzl", "tsql_dacpac")
+load("//tests/tools/build_test:build_test.bzl", "build_test")
 
 tsql_dacpac(
     name = "hello_bazel",
     srcs = glob(["**/*.sql"]),
+)
+
+build_test(
+    name = "hello_bazel_test",
+    expectations = {
+        "Element[@Name='[Foo]']": {
+            "@Type": "SqlSchema",
+            "Relationship": {
+                "@Name": "Authorizer",
+                "Entry/References/@Name": "[dbo]",
+            },
+        },
+        "Element[@Name='[Foo].[Bar]']": {
+            "@Type": "SqlTable",
+            "Relationship[@Name='Columns']": {
+                "Entry/Element": {
+                    "@Type": "SqlSimpleColumn",
+                    "@Name": "[Foo].[Bar].[Id]",
+                    "Property[@Name='IsNullable']": {
+                        "@Value": "False",
+                    },
+                    "Property[@Name='IsIdentity']": {
+                        "@Value": "True",
+                    },
+                    "Relationship/Entry/Element[@Type='SqlTypeSpecifier']/Relationship/Entry/References": {
+                        "@Name": "[int]",
+                    },
+                },
+            },
+        },
+    },
 )

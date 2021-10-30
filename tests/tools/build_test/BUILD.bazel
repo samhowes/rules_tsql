@@ -1,0 +1,15 @@
+load("@rules_msbuild//dotnet:defs.bzl", "msbuild_binary")
+
+exports_files(["build_test.sh"])
+
+msbuild_binary(
+    name = "build_test",
+    srcs = ["Program.cs"],
+    target_framework = "net5.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@nuget//FluentAssertions",
+        "@nuget//Newtonsoft.Json",
+        "@nuget//RulesMSBuild.Runfiles",
+    ],
+)

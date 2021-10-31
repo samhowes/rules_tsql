@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CommandLine;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using RulesMSBuild.Tools.Bazel;

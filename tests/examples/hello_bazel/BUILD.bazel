@@ -19,9 +19,8 @@ build_test(
         "Element[@Name='[Foo].[Bar]']": {
             "@Type": "SqlTable",
             "Relationship[@Name='Columns']": {
-                "Entry/Element": {
+                "Entry/Element[@Name='[Foo].[Bar].[Id]']": {
                     "@Type": "SqlSimpleColumn",
-                    "@Name": "[Foo].[Bar].[Id]",
                     "Property[@Name='IsNullable']": {
                         "@Value": "False",
                     },
@@ -31,6 +30,8 @@ build_test(
                     "Relationship/Entry/Element[@Type='SqlTypeSpecifier']/Relationship/Entry/References": {
                         "@Name": "[int]",
                     },
+                },
+                "Entry/Element[@Name='[Foo].[Bar].[Name]']": {
                 },
             },
         },

@@ -28,12 +28,30 @@ namespace builder
             foreach (var src in _args.Srcs)
             {
                 var script = File.ReadAllText(src);
-                model.AddObjects(script, objectOptions);
+                try
+                {
+                    model.AddObjects(script, objectOptions);
+                }
+                catch (DacModelException)
+                {
+                    var errors = model.GetModelErrors();
+                    foreach (var error in errors)
+                    {
+                        var level = error.Severity == ModelErrorSeverity.Error ? "Error" : "Warning";
+                        Console.WriteLine($"{src}:{error.Line}:{error.Column}: {level} {error.Prefix}{error.ErrorCode}: {error.Message}");    
+                    }
+                    
+                    Console.WriteLine("Build model failed");
+                    return false;
+                }
             }
 
             if (!ValidateModel(model)) return false;
 
-            DacPackageExtensions.BuildPackage(_args.Output, model, new PackageMetadata() {Name = _args.Label},
+            DacPackageExtensions.BuildPackage(
+                _args.Output, 
+                model, 
+                new PackageMetadata() {Name = _args.Label},
                 new PackageOptions { });
 
             return true;

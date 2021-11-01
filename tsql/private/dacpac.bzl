@@ -13,17 +13,30 @@ def tsql_dacpac_macro(name, **kwargs):
 
 def _dacpac_impl(ctx):
     dacpac = ctx.actions.declare_file(ctx.attr.name + ".dacpac")
+    model_xml = ctx.actions.declare_file("_%s/Model.xml" % ctx.attr.name)
+
+    deps = [d[DacpacInfo].dacpac for d in ctx.attr.deps]
 
     args = ctx.actions.args()
     args.add_all([
         "build",
-        "--label=" + str(ctx.label),
-        "--output=" + dacpac.path,
-    ] + ctx.files.srcs)
+        "--label",
+        str(ctx.label),
+        "--output",
+        dacpac.path,
+    ])
+    if len(deps) > 0:
+        args.add("--deps")
+        args.add(",".join([d.path for d in deps]))
+
+    args.add("--srcs")
+    args.add_all(ctx.files.srcs)
+
+    #    args.add(",".join([f.path for f in ctx.files.srcs]))
     ctx.actions.run(
         mnemonic = "CompileDacpac",
-        inputs = ctx.files.srcs,
-        outputs = [dacpac],
+        inputs = ctx.files.srcs + deps,
+        outputs = [dacpac, model_xml],
         executable = ctx.executable._builder,
         arguments = [args],
     )
@@ -35,6 +48,9 @@ def _dacpac_impl(ctx):
             ),
         ),
         DacpacInfo(dacpac = dacpac),
+        OutputGroupInfo(
+            all = [dacpac, model_xml],
+        ),
     ]
 
 def _unpack_impl(ctx):
@@ -98,6 +114,10 @@ properties = {
 }
 ```
 """,
+        ),
+        "deps": attr.label_list(
+            doc = """List of dacpacs that this dacpac depends on.""",
+            providers = [DacpacInfo],
         ),
         "_builder": BUILDER,
     },

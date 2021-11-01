@@ -30,8 +30,8 @@ namespace build_test
                 dacpac = path;
             }
 
-            Console.WriteLine(dacpac);
-            Console.WriteLine(string.Join(",", args));
+            // Console.WriteLine(dacpac);
+            // Console.WriteLine(string.Join(",", args));
             var expectations = JObject.Parse(args[1]);
 
             var zip = ZipFile.OpenRead(dacpac);
@@ -71,10 +71,8 @@ namespace build_test
 
             var root = doc.Root;
             root.Should().NotBeNull("Missing root document element");
-            var model = root!.XPathSelectElement("Model");
-            model.Should().NotBeNull("Missing model element");
 
-            var tester = new Tester(model, expectations);
+            var tester = new Tester(root, expectations);
             tester.Assert();
         }
     }

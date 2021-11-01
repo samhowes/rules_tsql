@@ -17,7 +17,10 @@ namespace builder
 
         [Option("sql_server_version")] public string SqlServerVersion { get; set; } = "Sql150";
         
-        [Value(0)]
+        [Option("deps")]
+        public IEnumerable<string> Deps { get; set; }
+        
+        [Option("srcs")]
         public IEnumerable<string> Srcs { get; set; }
     }
 
@@ -72,8 +75,8 @@ namespace builder
         private static int Build(BuildArgs buildArgs)
         {
             var builder = new MSBuildBuilder(buildArgs, new BuildOptions());
-            builder.Build();
-            return 0;
+            var result = builder.Build();
+            return result ? 0 : 1;
             
         }
     }

@@ -1,7 +1,7 @@
-CREATE PROC EDURE [foo].[MakeBar]
+CREATE PROCEDURE [foo].[MakeBar]
 AS BEGIN
-    INSERT INTO [Foo].Bar (Name)
+    INSERT INTO [foo].Bar (Name)
     VALUES ('yay')
 
-    SELECT * from What.Why
+    SELECT * from Foo.Bar
 END

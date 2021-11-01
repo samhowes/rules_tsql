@@ -9,38 +9,40 @@ tsql_dacpac(
 build_test(
     name = "hello_bazel_test",
     expectations = {
-        "Element[@Name='[foo]']": {
-            "@Type": "SqlSchema",
-            "Relationship": {
-                "@Name": "Authorizer",
-                "Entry/References/@Name": "[dbo]",
-            },
-        },
-        "Element[@Name='[foo].[Bar]']": {
-            "@Type": "SqlTable",
-            "Relationship[@Name='Columns']": {
-                "Entry/Element[@Name='[foo].[Bar].[Id]']": {
-                    "@Type": "SqlSimpleColumn",
-                    "Property[@Name='IsNullable']": {
-                        "@Value": "False",
-                    },
-                    "Property[@Name='IsIdentity']": {
-                        "@Value": "True",
-                    },
-                    "Relationship/Entry/Element[@Type='SqlTypeSpecifier']/Relationship/Entry/References": {
-                        "@Name": "[int]",
-                    },
-                },
-                "Entry/Element[@Name='[foo].[Bar].[Name]']": {
+        "Model": {
+            "Element[@Name='[foo]']": {
+                "@Type": "SqlSchema",
+                "Relationship": {
+                    "@Name": "Authorizer",
+                    "Entry/References/@Name": "[dbo]",
                 },
             },
-        },
-        "Element[@Name='[foo].[MakeBar]']": {
-            "@Type": "SqlProcedure",
-            "Property[@Name='BodyScript']": {},
-            "Relationship[@Name='BodyDependencies']": {
-                "Entry/References[@Name='[foo].[Bar]']": {},
-                "Entry/References[@Name='[foo].[Bar].[Name]']": {},
+            "Element[@Name='[foo].[Bar]']": {
+                "@Type": "SqlTable",
+                "Relationship[@Name='Columns']": {
+                    "Entry/Element[@Name='[foo].[Bar].[Id]']": {
+                        "@Type": "SqlSimpleColumn",
+                        "Property[@Name='IsNullable']": {
+                            "@Value": "False",
+                        },
+                        "Property[@Name='IsIdentity']": {
+                            "@Value": "True",
+                        },
+                        "Relationship/Entry/Element[@Type='SqlTypeSpecifier']/Relationship/Entry/References": {
+                            "@Name": "[int]",
+                        },
+                    },
+                    "Entry/Element[@Name='[foo].[Bar].[Name]']": {
+                    },
+                },
+            },
+            "Element[@Name='[foo].[MakeBar]']": {
+                "@Type": "SqlProcedure",
+                "Property[@Name='BodyScript']": {},
+                "Relationship[@Name='BodyDependencies']": {
+                    "Entry/References[@Name='[foo].[Bar]']": {},
+                    "Entry/References[@Name='[foo].[Bar].[Name]']": {},
+                },
             },
         },
     },

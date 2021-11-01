@@ -1,4 +1,4 @@
-load("@rules_tsql//tsql:defs.bzl", "tsql_dacpac")
+load("//tsql:defs.bzl", "tsql_dacpac")
 load("//tests/tools/build_test:build_test.bzl", "build_test")
 
 tsql_dacpac(
@@ -9,17 +9,17 @@ tsql_dacpac(
 build_test(
     name = "hello_bazel_test",
     expectations = {
-        "Element[@Name='[Foo]']": {
+        "Element[@Name='[foo]']": {
             "@Type": "SqlSchema",
             "Relationship": {
                 "@Name": "Authorizer",
                 "Entry/References/@Name": "[dbo]",
             },
         },
-        "Element[@Name='[Foo].[Bar]']": {
+        "Element[@Name='[foo].[Bar]']": {
             "@Type": "SqlTable",
             "Relationship[@Name='Columns']": {
-                "Entry/Element[@Name='[Foo].[Bar].[Id]']": {
+                "Entry/Element[@Name='[foo].[Bar].[Id]']": {
                     "@Type": "SqlSimpleColumn",
                     "Property[@Name='IsNullable']": {
                         "@Value": "False",
@@ -31,8 +31,16 @@ build_test(
                         "@Name": "[int]",
                     },
                 },
-                "Entry/Element[@Name='[Foo].[Bar].[Name]']": {
+                "Entry/Element[@Name='[foo].[Bar].[Name]']": {
                 },
+            },
+        },
+        "Element[@Name='[foo].[MakeBar]']": {
+            "@Type": "SqlProcedure",
+            "Property[@Name='BodyScript']": {},
+            "Relationship[@Name='BodyDependencies']": {
+                "Entry/References[@Name='[foo].[Bar]']": {},
+                "Entry/References[@Name='[foo].[Bar].[Name]']": {},
             },
         },
     },

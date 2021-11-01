@@ -4,14 +4,17 @@ msbuild_binary(
     name = "builder",
     srcs = [
         "Builder.cs",
+        "MSBuildEngine.cs",
         "ModelValidationError.cs",
         "Program.cs",
+        "SimpleBuilder.cs",
         "TSqlModelExtensions.cs",
     ],
     target_framework = "net5.0",
     visibility = ["//visibility:public"],
     deps = [
         "@nuget//CommandLineParser",
+        "@nuget//Microsoft.Build.Utilities.Core",
         "@nuget//Microsoft.SqlServer.DacFx",
         "@nuget//RulesMSBuild.Runfiles",
     ],

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.IO.Compression;
 using CommandLine;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-using RulesMSBuild.Tools.Bazel;
 
 namespace builder
 {
-    public class Args
+    [Verb("build", isDefault:true)]
+    public class BuildArgs
     {
         [Option("label", Required = true)]
         public string Label { get; set; }
@@ -20,6 +20,17 @@ namespace builder
         [Value(0)]
         public IEnumerable<string> Srcs { get; set; }
     }
+
+    [Verb("unpack")]
+    public class UnpackArgs
+    {
+        [Option("output", Required = true)] 
+        public string Output { get; set; }
+        
+        [Option("dacpac", Required = true)] 
+        public string Dacpac { get; set; }
+    }
+    
     class Program
     {
         static int Main(string[] args)
@@ -29,15 +40,38 @@ namespace builder
             // foreach (var key in env.Keys.Cast<string>().OrderBy(k => k))
             //     Console.WriteLine($"{key}={env[key]}");
             
-            return Parser.Default.ParseArguments<Args>(args)
+            return Parser.Default.ParseArguments<BuildArgs, UnpackArgs>(args)
                 .MapResult(
-                    (Args typedArgs) => Build(typedArgs),
+                    (BuildArgs typedArgs) => Build(typedArgs),
+                    (UnpackArgs typedArgs) => Unpack(typedArgs),
                     errors => 1);
         }
 
-        private static int Build(Args args)
+        private static int Unpack(UnpackArgs args)
         {
-            var builder = new Builder(args, new BuildOptions());
+            var zip = ZipFile.OpenRead(args.Dacpac);
+            var files = new Dictionary<string, ZipArchiveEntry>();
+            foreach (var entry in zip.Entries)
+            {
+                files[entry.FullName] = entry;
+            }
+
+            if (!files.TryGetValue("model.xml", out var modelXml))
+            {
+                Console.WriteLine("Invalid Dacpac: model.xml not found.");
+                return 1;
+            }
+
+            using var output = File.Create(args.Output);
+            using var input = modelXml.Open();
+            input.CopyTo(output);
+            output.Flush();
+            return 0;
+        }
+
+        private static int Build(BuildArgs buildArgs)
+        {
+            var builder = new MSBuildBuilder(buildArgs, new BuildOptions());
             builder.Build();
             return 0;
             

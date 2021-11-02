@@ -1,12 +1,30 @@
+load("@bazel_skylib//lib:shell.bzl", "shell")
+
 # bzl:generated start
 load("@rules_msbuild//tools:gazelle.bzl", "gazelle")
 
 gazelle(
     name = "gazelle",
     args = [
-        "--deps_macro=deps/nuget.bzl%nuget_deps",
+        "--deps_macro=deps:nuget.bzl%nuget_deps",
         "--srcs_mode=explicit",  # change value to "explicit" for better bazel performance
     ],
 )
 
 # bzl:generated end
+
+genrule(
+    name = "tar",
+    srcs = [],
+    outs = [
+        "rules_tsql.tar.gz",
+        "rules_tsql.tar.gz.sha256",
+    ],
+    cmd = " ".join([
+        "$(location //eng/tar)",
+        " --tar=" + shell.quote("$(OUTS)"),
+    ]),
+    exec_tools = ["//eng/tar"],
+    tags = ["local"],
+    visibility = ["//:__subpackages__"],
+)

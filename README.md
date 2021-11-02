@@ -1,7 +1,7 @@
 # rules_tsql
 TSQL Rules for Bazel
 
-## Coming soon...
+## Build Rules
 ```python
 load("@rules_tsql//tsql:defs.bzl", "tsql_dacpac")
 
@@ -23,6 +23,42 @@ tsql_dacpac(
 2. No Visual Studio Build tools dependencies
 3. Compile Dacpacs with references to other dacpacs
 4. MSBuild .sqlproj feature parity 
+
+## Usage
+WORKSPACE
+```python
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "rules_msbuild",
+    sha256 = "607a251ed80ef195c85edd95689df96e7aae97911bbbf0be1884594d32d8472a",
+    urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.10/rules_msbuild-0.0.10.tar.gz"],
+)
+load("@rules_msbuild//dotnet:deps.bzl", "msbuild_register_toolchains", "msbuild_rules_dependencies")
+msbuild_rules_dependencies()
+msbuild_register_toolchains(version = "host")
+
+http_archive(
+    name = "rules_tsql",
+    sha256 = "",
+    urls = ["https://github.com/samhowes/rules_tsql/release/download/0.0.1/rules_tsql-0.0.1.tar.gz"],
+)
+load("@rules_tsql//tsql/deps.bzl", "tsql_rules_dependencies")
+tsql_rules_dependencies()
+```
+
+NuGet Packages:
+```python
+load("@rules_tsql//deps/public.nuget.bzl", "TSQL_PACKAGES", "TSQL_FRAMEWORKS")
+load("@rules_msbuild//deps/public.nuget.bzl", "PACKAGES", "FRAMEWORKS")
+load("@rules_msbuild//dotnet:defs.bzl", "nuget_deps_helper", "nuget_fetch")
+
+nuget_fetch(
+    name = "nuget",
+    packages = {},
+    deps = nuget_deps_helper(FRAMEWORKS, PACKAGES) +
+           nuget_deps_helper(TSQL_FRAMEWORKS, TSQL_PACKAGES), 
+)
+```
 
 ## Details
 Compilation is done using [SqlBuildTask](https://docs.microsoft.com/en-us/dotnet/api/microsoft.data.tools.schema.tasks.sql.sqlbuildtask?view=sql-datatools-msbuild-16) from [Microsoft.Data.Tools.Schema.Tasks.Sql.dll](https://docs.microsoft.com/en-us/dotnet/api/microsoft.data.tools.schema.tasks.sql?view=sql-datatools-msbuild-16) available via the [DacFx package](https://www.nuget.org/packages/Microsoft.SqlServer.DacFx/150.5290.2-preview) (preview versions have the Tasks dll).

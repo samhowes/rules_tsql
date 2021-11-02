@@ -2,3 +2,4 @@ bazel-*
 dotnet-bin
 tmp
 *.DotSettings.user
+.idea

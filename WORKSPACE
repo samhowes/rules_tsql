@@ -27,7 +27,10 @@ msbuild_register_toolchains(version = "host")
 
 # bzl:generated end
 
-load("//:deps/nuget.bzl", "nuget_deps")
+load("//deps:nuget.bzl", "nuget_deps")
+
+# gazelle:nuget_macro deps:nuget.bzl%nuget_deps
+nuget_deps()
 
 # gazelle:nuget_macro deps/nuget.bzl%nuget_deps
 nuget_deps()

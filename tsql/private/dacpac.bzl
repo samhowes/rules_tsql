@@ -1,6 +1,6 @@
 load(":providers.bzl", "DacpacInfo")
 
-def tsql_dacpac_macro(name, **kwargs):
+def tsql_dacpac_macro(name, extract_args = [], **kwargs):
     tsql_dacpac(
         name = name,
         **kwargs
@@ -9,6 +9,20 @@ def tsql_dacpac_macro(name, **kwargs):
     tsql_unpack(
         name = name + ".unpack",
         dacpac = ":" + name,
+    )
+
+    native.sh_binary(
+        name = name + ".extract",
+        srcs = ["@rules_tsql//tsql/tools/builder:script.sh"],
+        args = [
+            "extract",
+            "--database_name",
+            name,
+            "--output_directory",
+            native.package_name(),
+        ] + extract_args,
+        deps = [],
+        data = ["@rules_tsql//tsql/tools/builder"],
     )
 
 def _dacpac_impl(ctx):

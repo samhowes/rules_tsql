@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using CommandLine;
+using Microsoft.SqlServer.Dac;
 
 namespace builder
 {
@@ -34,6 +35,33 @@ namespace builder
         public string Dacpac { get; set; }
     }
     
+    [Verb("extract")]
+    public class ExtractArgs
+    {
+        [Option('d', "database_name")]
+        public string DatabaseName { get; set; }
+        [Option('s', "server")]
+        public string Server { get; set; }
+        
+        [Option('u', "username")]
+        public string Username { get; set; }
+        
+        [Option('p', "password")]
+        public string Password { get; set; }
+        
+        [Option('o', "output_directory")]
+        public string TargetPath { get; set; }
+
+        [Option("connection_string")]
+        public string ConnectionString { get; set; }
+        
+        [Option("mode", Default = DacExtractTarget.SchemaObjectType)]
+        public DacExtractTarget Mode { get; set; }
+        
+        [Option("delete")]
+        public bool Delete { get; set; }
+    }
+    
     class Program
     {
         static int Main(string[] args)
@@ -43,10 +71,11 @@ namespace builder
             // foreach (var key in env.Keys.Cast<string>().OrderBy(k => k))
             //     Console.WriteLine($"{key}={env[key]}");
             
-            return Parser.Default.ParseArguments<BuildArgs, UnpackArgs>(args)
+            return Parser.Default.ParseArguments<BuildArgs, UnpackArgs, ExtractArgs>(args)
                 .MapResult(
                     (BuildArgs typedArgs) => Build(typedArgs),
                     (UnpackArgs typedArgs) => Unpack(typedArgs),
+                    (ExtractArgs typedArgs) => Extract(typedArgs),
                     errors => 1);
         }
 
@@ -77,7 +106,12 @@ namespace builder
             var builder = new MSBuildBuilder(buildArgs, new BuildOptions());
             var result = builder.Build();
             return result ? 0 : 1;
-            
+        }
+
+        private static int Extract(ExtractArgs args)
+        {
+            var extractor = new Extractor(args);
+            return extractor.Extract();
         }
     }
 

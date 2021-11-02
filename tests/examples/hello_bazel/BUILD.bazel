@@ -1,4 +1,4 @@
-load("//tsql:defs.bzl", "tsql_dacpac")
+load("//tools:defaults.bzl", "tsql_dacpac")
 load("//tests/tools/build_test:build_test.bzl", "build_test")
 
 tsql_dacpac(

@@ -1,9 +1,12 @@
 load("@rules_msbuild//dotnet:defs.bzl", "msbuild_binary")
 
+exports_files(["script.sh"])
+
 msbuild_binary(
     name = "builder",
     srcs = [
         "Builder.cs",
+        "Extractor.cs",
         "MSBuildEngine.cs",
         "ModelValidationError.cs",
         "Program.cs",

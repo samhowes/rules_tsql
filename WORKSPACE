@@ -14,10 +14,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_msbuild",
-    #    sha256 = "a2803ac52e19bf7b94db2328906e928dca77aeabef339df544cf8b3a6b2315e8",
-    sha256 = "a2803ac52e19bf7b94db2328906e928dca77aeabef339df544cf8b3a6b2315e8",
-    #    urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.9/rules_msbuild-0.0.9.tar.gz"],
-    urls = ["file:/Users/samh/dev/rules_msbuild/bazel-bin/rules_msbuild.tar.gz"],
+    sha256 = "607a251ed80ef195c85edd95689df96e7aae97911bbbf0be1884594d32d8472a",
+    urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.10/rules_msbuild-0.0.10.tar.gz"],
 )
 
 load("@rules_msbuild//dotnet:deps.bzl", "msbuild_register_toolchains", "msbuild_rules_dependencies")
@@ -27,9 +25,9 @@ msbuild_rules_dependencies()
 # See https://dotnet.microsoft.com/download/dotnet for valid versions
 msbuild_register_toolchains(version = "host")
 
-load("//:deps/nuget.bzl", "nuget_deps")
-
 # bzl:generated end
+
+load("//:deps/nuget.bzl", "nuget_deps")
 
 # gazelle:nuget_macro deps/nuget.bzl%nuget_deps
 nuget_deps()

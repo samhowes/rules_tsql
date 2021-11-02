@@ -39,6 +39,19 @@ def _dacpac_impl(ctx):
         "--output",
         dacpac.path,
     ])
+
+    inputs = ctx.files.srcs + deps
+
+    properties = getattr(ctx.attr, "properties", None)
+    if properties:
+        properties_file = ctx.actions.declare_file(ctx.attr.name + ".properties.json")
+        inputs.append(properties_file)
+        ctx.actions.write(properties_file, json.encode(properties))
+        args.add_all([
+            "--properties_file",
+            properties_file,
+        ])
+
     if len(deps) > 0:
         args.add("--deps")
         args.add(",".join([d.path for d in deps]))
@@ -49,7 +62,7 @@ def _dacpac_impl(ctx):
     #    args.add(",".join([f.path for f in ctx.files.srcs]))
     ctx.actions.run(
         mnemonic = "CompileDacpac",
-        inputs = ctx.files.srcs + deps,
+        inputs = inputs,
         outputs = [dacpac, model_xml],
         executable = ctx.executable._builder,
         arguments = [args],

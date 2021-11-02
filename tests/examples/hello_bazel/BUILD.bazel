@@ -4,23 +4,29 @@ load("//tests/tools/build_test:build_test.bzl", "build_test")
 tsql_dacpac(
     name = "hello_bazel",
     srcs = glob(["**/*.sql"]),
+    properties = {
+        "ModelCollation": "1033, CI",
+    },
 )
 
+# Verify the contents of the output Model.xml file
+# Each key in a dictionary is an XPath for a single node.
+# Keys with string values are validated against the retrieved value from the xml element or attribute
 build_test(
     name = "hello_bazel_test",
     expectations = {
         "Model": {
-            "Element[@Name='[foo]']": {
+            "Element[@Name='[Foo]']": {
                 "@Type": "SqlSchema",
                 "Relationship": {
                     "@Name": "Authorizer",
                     "Entry/References/@Name": "[dbo]",
                 },
             },
-            "Element[@Name='[foo].[Bar]']": {
+            "Element[@Name='[Foo].[Bar]']": {
                 "@Type": "SqlTable",
                 "Relationship[@Name='Columns']": {
-                    "Entry/Element[@Name='[foo].[Bar].[Id]']": {
+                    "Entry/Element[@Name='[Foo].[Bar].[Id]']": {
                         "@Type": "SqlSimpleColumn",
                         "Property[@Name='IsNullable']": {
                             "@Value": "False",
@@ -32,7 +38,7 @@ build_test(
                             "@Name": "[int]",
                         },
                     },
-                    "Entry/Element[@Name='[foo].[Bar].[Name]']": {
+                    "Entry/Element[@Name='[Foo].[Bar].[Name]']": {
                     },
                 },
             },
@@ -40,8 +46,8 @@ build_test(
                 "@Type": "SqlProcedure",
                 "Property[@Name='BodyScript']": {},
                 "Relationship[@Name='BodyDependencies']": {
-                    "Entry/References[@Name='[foo].[Bar]']": {},
-                    "Entry/References[@Name='[foo].[Bar].[Name]']": {},
+                    "Entry/References[@Name='[Foo].[Bar]']": {},
+                    "Entry/References[@Name='[Foo].[Bar].[Name]']": {},
                 },
             },
         },

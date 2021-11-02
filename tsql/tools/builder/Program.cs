@@ -23,6 +23,9 @@ namespace builder
         
         [Option("srcs")]
         public IEnumerable<string> Srcs { get; set; }
+        
+        [Option("properties_file")]
+        public string PropertiesFile { get; set; }
     }
 
     [Verb("unpack")]

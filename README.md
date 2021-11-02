@@ -40,7 +40,7 @@ msbuild_register_toolchains(version = "host")
 http_archive(
     name = "rules_tsql",
     sha256 = "510e21cf063e3dbc906509656e5a6dabfc32be1916384cb1208492ffdd603957",
-    urls = ["https://github.com/samhowes/rules_tsql/release/download/0.0.1/rules_tsql-0.0.1.tar.gz"],
+    urls = ["https://github.com/samhowes/rules_tsql/releases/download/0.0.1/rules_tsql-0.0.1.tar.gz"],
 )
 load("@rules_tsql//tsql/deps.bzl", "tsql_rules_dependencies")
 tsql_rules_dependencies()
@@ -48,8 +48,8 @@ tsql_rules_dependencies()
 
 NuGet Packages:
 ```python
-load("@rules_tsql//deps/public.nuget.bzl", "TSQL_PACKAGES", "TSQL_FRAMEWORKS")
-load("@rules_msbuild//deps/public.nuget.bzl", "PACKAGES", "FRAMEWORKS")
+load("@rules_tsql//deps:public.nuget.bzl", "TSQL_FRAMEWORKS", "TSQL_PACKAGES")
+load("@rules_msbuild//deps:public_nuget.bzl", "FRAMEWORKS", "PACKAGES")
 load("@rules_msbuild//dotnet:defs.bzl", "nuget_deps_helper", "nuget_fetch")
 
 nuget_fetch(
@@ -59,6 +59,8 @@ nuget_fetch(
            nuget_deps_helper(TSQL_FRAMEWORKS, TSQL_PACKAGES), 
 )
 ```
+
+See `//tests/examples` for more usage examples
 
 ## Details
 Compilation is done using [SqlBuildTask](https://docs.microsoft.com/en-us/dotnet/api/microsoft.data.tools.schema.tasks.sql.sqlbuildtask?view=sql-datatools-msbuild-16) from [Microsoft.Data.Tools.Schema.Tasks.Sql.dll](https://docs.microsoft.com/en-us/dotnet/api/microsoft.data.tools.schema.tasks.sql?view=sql-datatools-msbuild-16) available via the [DacFx package](https://www.nuget.org/packages/Microsoft.SqlServer.DacFx/150.5290.2-preview) (preview versions have the Tasks dll).

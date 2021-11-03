@@ -8,7 +8,7 @@ try-import %workspace%/buildbuddy.bazelrc
 EOF
 
 # buildbuddy rc
-bash_workspace_command="$(pwd)/.buildbuddy/workspace_status.sh"
+bash_workspace_command="$(pwd)/.ci/workspace_status.sh"
 if [[ "${CI_EXEC:-}" == "cmd" ]]; then
   cat > workspace_command.cmd <<EOF
 bash "$bash_workspace_command"

@@ -8,6 +8,9 @@ load("@rules_tsql//tsql:defs.bzl", "tsql_dacpac")
 tsql_dacpac(
     name = "my_db",                   # builds `my_db.dacpac`
     srcs = glob(["my_db/**/*.sql"]),
+    properties = {
+        "ModelCollation": "1033, CI", # same effect as <ProeprtyGroup> elements in sqlproj
+    },
 )
 
 tsql_dacpac(

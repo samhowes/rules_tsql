@@ -1,0 +1,65 @@
+trigger:
+  - master
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - "*"
+  drafts: true
+
+parameters:
+  - name: platforms
+    type: object
+    default:
+      - name: windows
+        pool:
+          vmImage: windows-2019
+      - name: linux
+        pool:
+          vmImage: ubuntu-18.04
+      - name: mac
+        pool:
+          vmImage: macOS-latest
+
+env:
+  MSYS2_ARG_CONV_EXCL: "*"
+  BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
+
+jobs:
+  - ${{ each platform in parameters.platforms }}:
+      - job: ${{ platform.name }}
+        pool: ${{ platform.pool }}
+
+
+        steps:
+          - bash: |
+              if [[ '${{platform.name}}' == 'windows' ]]; then
+                export CI_EXEC='cmd';
+                git config --system core.longpaths true
+              else
+                export CI_EXEC='bash';
+              fi
+              .ci/init.sh
+            displayName: 'CI Init'
+
+          - script: |
+              bazel test //...
+            displayName: 'Build & Test'
+
+#          - script: |
+#              bash .ci/tar.sh
+#              bazel run //.azpipelines:publish
+#            displayName: 'tar outputs'
+#            condition: always()
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test.xml'
+              searchFolder: '$(System.DefaultWorkingDirectory)/bazel-testlogs'
+              failTaskOnFailedTests: true
+              buildPlatform: '${{ platform.name }}'
+              testRunTitle: '${{ platform.name }}'
+              publishRunAttachments: true
+            condition: always()

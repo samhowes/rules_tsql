@@ -3,3 +3,4 @@ dotnet-bin
 tmp
 *.DotSettings.user
 .idea
+*.user

@@ -31,8 +31,8 @@ namespace build_test
             }
 
             // Console.WriteLine(dacpac);
-            // Console.WriteLine(string.Join(",", args));
-            var expectations = JObject.Parse(args[1]);
+            Console.WriteLine(string.Join(",", args));
+            var expectations = JObject.Parse(File.ReadAllText(runfiles.Rlocation("rules_tsql/" + args[1])));
 
             var zip = ZipFile.OpenRead(dacpac);
             var files = new Dictionary<string, ZipArchiveEntry>();

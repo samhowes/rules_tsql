@@ -13,4 +13,6 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 
 runner="$(rlocation "rules_tsql/$1")"
 
+runfiles_export_envvars
+
 $runner "$2" "$3"

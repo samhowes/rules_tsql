@@ -22,9 +22,8 @@ parameters:
         pool:
           vmImage: macOS-latest
 
-env:
+variables:
   MSYS2_ARG_CONV_EXCL: "*"
-  BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
 
 jobs:
   - ${{ each platform in parameters.platforms }}:
@@ -42,6 +41,8 @@ jobs:
               fi
               .ci/init.sh
             displayName: 'CI Init'
+            env:
+              BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
 
           - script: |
               bazel test //...

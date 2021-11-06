@@ -1,3 +1,7 @@
+load(":builder.bzl", "builder")
+
+package(default_visibility = ["//visibility:public"])
+
 exports_files(["script.sh"])
 
 filegroup(
@@ -7,10 +11,8 @@ filegroup(
     ],
 )
 
-sh_binary(
-    name = "builder",
-    srcs = ["builder.bash"],
-    data = [":prebuilt_builder"],
-    visibility = ["//visibility:public"],
-    deps = ["@bazel_tools//tools/bash/runfiles"],
+builder(
+    name = "builder_publish",
+    files = ":prebuilt_builder",
+    launcher = "builder.bash",
 )

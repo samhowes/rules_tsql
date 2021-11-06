@@ -68,6 +68,7 @@ def _dacpac_impl(ctx):
         executable = toolchain.builder.executable,
         env = {
             "DOTNET_CLI_HOME": toolchain.dotnet_runtime.cli_home,
+            "DOTNET_RUNTIME_BIN": toolchain.dotnet_runtime.dotnet,
         },
         arguments = [args],
     )

@@ -1,8 +1,8 @@
-load("@rules_tsql//dotnet:repository.bzl", "DotnetRuntimeInfo")
-load("@rules_msbuild//dotnet/private:providers.bzl", "DotnetPublishInfo")
+load("@rules_dotnet_runtime//dotnet:defs.bzl", "DotnetPublishInfo", "DotnetRuntimeInfo")
 
 def _impl(ctx):
     info = ctx.attr.builder[DotnetPublishInfo]
+
     return [platform_common.ToolchainInfo(
         builder = struct(
             files = info.files,

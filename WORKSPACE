@@ -10,9 +10,10 @@ git_repository(
 )
 
 load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
-load("@rules_tsql//tsql:defs.bzl", "tsql_register_toolchains")
 
 rules_tsql_dependencies()
+
+load("@rules_tsql//tsql:defs.bzl", "tsql_register_toolchains")
 
 tsql_register_toolchains()
 

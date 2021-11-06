@@ -22,6 +22,10 @@ http_archive(
     sha256 = "$tarsha",
     url = "file:$tarpath",
 )
+load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
+rules_tsql_dependencies()
+load("@rules_tsql//tsql:defs.bzl", "tsql_register_toolchains")
+tsql_register_toolchains()
 EOF
 
 cat >>Foo.sql <<EOF

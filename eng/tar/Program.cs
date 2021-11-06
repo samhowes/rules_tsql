@@ -21,7 +21,7 @@ namespace tar
         {
             var args = argsArray.Select(a => a.TrimStart('-').Split('='))
                 .ToDictionary(p => p[0], p => p[1]);
-            
+
             var root = BazelEnvironment.TryGetWorkspaceRoot();
             if (root != null)
                 Directory.SetCurrentDirectory(root);
@@ -36,7 +36,7 @@ namespace tar
             }
             else
                 outputName = "test.tar.gz";
-            
+
             var files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             for (;;)
             {
@@ -61,6 +61,11 @@ namespace tar
             await process!.WaitForExitAsync();
             if (process.ExitCode != 0) return process.ExitCode;
 
+            var runfiles = Runfiles.Create();
+            var publishDir = runfiles.Rlocation("rules_tsql/tsql/tools/builder/publish/net5.0");
+            var published = RecordPublishFiles(files, publishDir);
+            var tmp = UpdateBuildRelease(files, published);
+
             await using (var output = File.Create(outputName))
             await using (var gzoStream = new GZipOutputStream(output))
             using (var tarArchive = TarArchive.CreateOutputTarArchive(gzoStream))
@@ -73,14 +78,17 @@ namespace tar
                     {
                         entry.TarHeader.Size = stream.Length;
                     }
+
                     entry.Name = tarEntry;
                     Console.WriteLine(entry.Name);
-                    
+
                     tarArchive.WriteEntry(entry, false);
                 }
 
                 tarArchive.Close();
             }
+
+            File.Delete(tmp);
 
             string hashValue;
             await using (var outputRead = File.OpenRead(outputName))
@@ -90,11 +98,45 @@ namespace tar
                 var hash = await sha.ComputeHashAsync(outputRead);
                 hashValue = Convert.ToHexString(hash).ToLower();
             }
-            
+
             Console.WriteLine($"SHA256 = {hashValue}");
             await File.WriteAllTextAsync(outputName + ".sha256", hashValue);
 
             return 0;
+        }
+
+        private static string UpdateBuildRelease(Dictionary<string, string> files, List<string> published)
+        {
+            var tmp = Path.Combine(BazelEnvironment.GetTmpDir(), Guid.NewGuid().ToString());
+            var buildReleaseContents = File.ReadAllText("tsql/tools/builder/BUILD.release.bazel");
+            var str = string.Join("\",\n        \"", published.OrderBy(p => p));
+            var replaced = buildReleaseContents.Replace("@@prebuilt_files@@", str);
+            File.WriteAllText(tmp, replaced);
+            files["tsql/tools/builder/BUILD.bazel"] = tmp;
+            return tmp;
+        }
+
+        private static List<string> RecordPublishFiles(Dictionary<string, string> files, string publishDir)
+        {
+            var list = new List<string>();
+
+            void WalkDirectory(string path)
+            {
+                foreach (var subDir in Directory.EnumerateDirectories(path))
+                {
+                    WalkDirectory(subDir);
+                }
+
+                foreach (var file in Directory.EnumerateFiles(path))
+                {
+                    var rel = string.Join("/", "prebuilt", file[(publishDir.Length + 1)..]);
+                    list.Add(rel);
+                    files[string.Join('/', "tsql/tools/builder", rel)] = file;
+                }
+            }
+
+            WalkDirectory(publishDir);
+            return list;
         }
     }
 }

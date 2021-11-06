@@ -25,6 +25,11 @@ genrule(
         " --tar=" + shell.quote("$(OUTS)"),
     ]),
     exec_tools = ["//eng/tar"],
-    tags = ["local"],
+    local = True,
+    tags = [
+        "local",
+        "manual",
+        "no-cache",
+    ],
     visibility = ["//:__subpackages__"],
 )

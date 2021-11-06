@@ -1,0 +1,16 @@
+exports_files(["script.sh"])
+
+filegroup(
+    name = "prebuilt_builder",
+    srcs = [
+        "@@prebuilt_files@@",
+    ],
+)
+
+sh_binary(
+    name = "builder",
+    srcs = ["builder.bash"],
+    data = [":prebuilt_builder"],
+    visibility = ["//visibility:public"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)

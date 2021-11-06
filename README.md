@@ -45,8 +45,8 @@ http_archive(
     sha256 = "510e21cf063e3dbc906509656e5a6dabfc32be1916384cb1208492ffdd603957",
     urls = ["https://github.com/samhowes/rules_tsql/releases/download/0.0.1/rules_tsql-0.0.1.tar.gz"],
 )
-load("@rules_tsql//tsql:deps.bzl", "tsql_rules_dependencies")
-tsql_rules_dependencies()
+load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
+rules_tsql_dependencies()
 ```
 
 NuGet Packages:

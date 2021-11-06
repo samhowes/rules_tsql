@@ -9,6 +9,10 @@ git_repository(
     shallow_since = "1629300223 -0400",
 )
 
+load("//tsql:deps.bzl", "rules_tsql_dependencies")
+
+rules_tsql_dependencies()
+
 # bzl:generated start
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -30,7 +34,4 @@ msbuild_register_toolchains(version = "host")
 load("//deps:nuget.bzl", "nuget_deps")
 
 # gazelle:nuget_macro deps:nuget.bzl%nuget_deps
-nuget_deps()
-
-# gazelle:nuget_macro deps/nuget.bzl%nuget_deps
 nuget_deps()

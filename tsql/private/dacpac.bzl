@@ -21,7 +21,7 @@ def tsql_dacpac_macro(name, extract_args = [], **kwargs):
             "--output_directory",
             native.package_name(),
         ] + extract_args,
-        deps = [],
+        deps = ["@bazel_tools//tools/bash/runfiles"],
         data = ["@rules_tsql//tsql/tools/builder"],
     )
 

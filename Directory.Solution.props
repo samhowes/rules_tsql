@@ -2,6 +2,7 @@
 
     <!--  bzl:generated start  -->
     <PropertyGroup>
+        <UseBazel Condition="'$(UseBazel)' == ''">true</UseBazel>
         <BazelProjectUseSolutionItems>true</BazelProjectUseSolutionItems>
     </PropertyGroup>
     <Import Project="Bazel.props" />

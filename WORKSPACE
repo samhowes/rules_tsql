@@ -15,17 +15,14 @@ rules_tsql_dependencies()
 
 # bzl:generated start
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
 http_archive(
     name = "rules_msbuild",
-    sha256 = "607a251ed80ef195c85edd95689df96e7aae97911bbbf0be1884594d32d8472a",
-    urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.10/rules_msbuild-0.0.10.tar.gz"],
+    sha256 = "7965a1acdd9d8b03db1a1f1706326bc59f88ed1343de00eda787ae0a5a6759aa",
+    urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.11/rules_msbuild-0.0.11.tar.gz"],
 )
-
 load("@rules_msbuild//dotnet:deps.bzl", "msbuild_register_toolchains", "msbuild_rules_dependencies")
 
 msbuild_rules_dependencies()
-
 # See https://dotnet.microsoft.com/download/dotnet for valid versions
 msbuild_register_toolchains(version = "host")
 

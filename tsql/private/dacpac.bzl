@@ -26,6 +26,7 @@ def tsql_dacpac_macro(name, extract_args = [], **kwargs):
     )
 
 def _dacpac_impl(ctx):
+    toolchain = ctx.toolchains["@rules_tsql//tsql:toolchain_type"]
     dacpac = ctx.actions.declare_file(ctx.attr.name + ".dacpac")
     model_xml = ctx.actions.declare_file("_%s/Model.xml" % ctx.attr.name)
 
@@ -62,9 +63,12 @@ def _dacpac_impl(ctx):
     #    args.add(",".join([f.path for f in ctx.files.srcs]))
     ctx.actions.run(
         mnemonic = "CompileDacpac",
-        inputs = inputs,
+        inputs = depset(inputs, transitive = [toolchain.builder.files]),
         outputs = [dacpac, model_xml],
-        executable = ctx.executable._builder,
+        executable = toolchain.builder.executable,
+        env = {
+            "DOTNET_CLI_HOME": toolchain.dotnet_runtime.cli_home,
+        },
         arguments = [args],
     )
     return [
@@ -146,8 +150,8 @@ properties = {
             doc = """List of dacpacs that this dacpac depends on.""",
             providers = [DacpacInfo],
         ),
-        "_builder": BUILDER,
     },
+    toolchains = ["@rules_tsql//tsql:toolchain_type"],
 )
 
 tsql_unpack = rule(

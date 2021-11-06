@@ -9,20 +9,26 @@ git_repository(
     shallow_since = "1629300223 -0400",
 )
 
-load("//tsql:deps.bzl", "rules_tsql_dependencies")
+load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
+load("@rules_tsql//tsql:defs.bzl", "tsql_register_toolchains")
 
 rules_tsql_dependencies()
 
+tsql_register_toolchains()
+
 # bzl:generated start
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 http_archive(
     name = "rules_msbuild",
     sha256 = "7965a1acdd9d8b03db1a1f1706326bc59f88ed1343de00eda787ae0a5a6759aa",
     urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.11/rules_msbuild-0.0.11.tar.gz"],
 )
+
 load("@rules_msbuild//dotnet:deps.bzl", "msbuild_register_toolchains", "msbuild_rules_dependencies")
 
 msbuild_rules_dependencies()
+
 # See https://dotnet.microsoft.com/download/dotnet for valid versions
 msbuild_register_toolchains(version = "host")
 

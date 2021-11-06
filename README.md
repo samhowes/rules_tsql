@@ -46,7 +46,9 @@ http_archive(
     urls = ["https://github.com/samhowes/rules_tsql/releases/download/0.0.1/rules_tsql-0.0.1.tar.gz"],
 )
 load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
+load("@rules_tsql//tsql:defs.bzl", "tsql_register_toolchains")
 rules_tsql_dependencies()
+tsql_register_toolchains()
 ```
 
 NuGet Packages:

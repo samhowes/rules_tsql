@@ -1,6 +1,27 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
+# rules_tsql:release start
+load("@rules_tsql//tsql:toolchain.bzl", "tsql_toolchain")
+
 package(default_visibility = ["//visibility:public"])
+
+toolchain_type(
+    name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+tsql_toolchain(
+    name = "toolchain_impl",
+    builder = "//tsql/tools/builder:builder_publish",
+    dotnet_runtime = "@dotnet_runtime//:dotnet_runtime",
+)
+
+toolchain(
+    name = "toolchain",
+    toolchain = ":toolchain_impl",
+    toolchain_type = "@rules_tsql//tsql:toolchain_type",
+)
+# rules_tsql:release end
 
 bzl_library(
     name = "bzl",

@@ -49,7 +49,7 @@ namespace builder
                 Source = _args.Srcs.Select(s => (ITaskItem) new TaskItem(s)).ToArray(),
                 SqlTarget = new TaskItem(_args.Output)
             };
-            
+
             var deps = _args.Deps?.ToList();
             if (deps?.Any() == true)
             {
@@ -60,7 +60,10 @@ namespace builder
                         return (ITaskItem) new TaskItem(d, new Dictionary<string, string>()
                         {
                             ["Name"] = name,
-                            ["DatabaseVariableLiteralValue"] = name, 
+                            ["DatabaseVariableLiteralValue"] = name,
+                            // don't validate the external schema: it was already validated appropriately 
+                            // when we built it before
+                            ["SuppressMissingDependenciesErrors"] = "True",
                         });
                     }).ToArray();
             }
@@ -74,7 +77,7 @@ namespace builder
                 if (!SetProperties(buildTask))
                     return false;
             }
-            
+
             var result = buildTask.Execute();
             if (!result)
             {
@@ -88,7 +91,7 @@ namespace builder
         {
             var dict =
                 JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(_args.PropertiesFile));
-            
+
             var properties = typeof(SqlBuildTask).GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
@@ -99,7 +102,7 @@ namespace builder
                     Console.WriteLine($"Property `{name}` does not exist on {nameof(SqlBuildTask)}.");
                     return false;
                 }
-                
+
                 if (property.GetValue(buildTask) != null) continue;
 
                 var type = property.PropertyType;
@@ -116,9 +119,8 @@ namespace builder
                 {
                     Console.WriteLine($"Warning: unknown property type '{type.Name}', can't set property '{name}'");
                 }
-                
+
                 property.SetValue(buildTask, propertyValue);
-                
             }
 
             return true;

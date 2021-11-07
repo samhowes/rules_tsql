@@ -1,3 +1,3 @@
-CREATE TABLE [dbo].[provide](
-    [Id] INT NOT NULL PRIMARY KEY
-)
+CREATE VIEW [dbo].[provide]
+AS
+SELECT * FROM [transitive].[dbo].[data]

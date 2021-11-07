@@ -1,0 +1,3 @@
+CREATE TABLE [dbo].[data](
+    [Id] INT NOT NULL PRIMARY KEY
+)

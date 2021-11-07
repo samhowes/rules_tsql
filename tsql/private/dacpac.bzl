@@ -60,6 +60,12 @@ def _dacpac_impl(ctx):
     args.add("--srcs")
     args.add_all(ctx.files.srcs)
 
+    basename = toolchain.builder.executable.realpath
+    if basename.endswith(".exe"):
+        basename = basename[:-4]
+
+    runfiles_dir = basename + ".dll.runfiles"
+
     ctx.actions.run(
         mnemonic = "CompileDacpac",
         inputs = depset(inputs, transitive = [toolchain.builder.files]),
@@ -68,6 +74,7 @@ def _dacpac_impl(ctx):
         env = {
             "DOTNET_CLI_HOME": toolchain.dotnet_runtime.cli_home,
             "DOTNET_RUNTIME_BIN": toolchain.dotnet_runtime.dotnet,
+            "RUNFILES_DIR": runfiles_dir,
         },
         arguments = [args],
     )

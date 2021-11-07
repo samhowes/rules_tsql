@@ -45,6 +45,7 @@ jobs:
               BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
 
           - bash: |
+              set -euo pipefail
               bazel test //...
               eng/e2e.sh
             displayName: 'Build & Test'

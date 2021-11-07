@@ -69,7 +69,7 @@ namespace tar
                 if (Path.GetFileName(actual) == _outputName) continue;
 
                 var tarValue = actual;
-                actual = sPath.Combine(_root, actual);
+                actual = Path.Combine(_root, actual);
                 var match = ReleaseRegex.Match(actual);
                 if (match.Success)
                 {

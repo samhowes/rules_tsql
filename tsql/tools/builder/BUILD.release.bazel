@@ -1,0 +1,25 @@
+load(":builder.bzl", "builder")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["script.sh"])
+
+filegroup(
+    name = "prebuilt_builder",
+    srcs = [
+        "@@prebuilt_files@@",
+    ],
+)
+
+builder(
+    name = "builder_publish",
+    files = ":prebuilt_builder",
+    launcher = "prebuilt/builder",
+    launcher_windows = "prebuilt/builder.exe",
+)
+
+alias(
+    name = "builder_tool",
+    actual = ":builder_publish",
+    visibility = ["//visibility:public"],
+)

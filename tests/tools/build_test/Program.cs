@@ -18,7 +18,7 @@ namespace build_test
     {
         static int Main(string[] args)
         {
-            var runfiles = Runfiles.Create<Program>();
+            var runfiles = Runfiles.Create();
             var path = args[0];
             string dacpac;
             if (!Path.IsPathRooted(path))
@@ -100,7 +100,7 @@ namespace build_test
             switch (token.Type)
             {
                 case JTokenType.Object:
-                    var obj = (JObject)token;
+                    var obj = (JObject) token;
                     foreach (var prop in obj.Properties())
                     {
                         _path.Push(prop.Name);
@@ -112,12 +112,14 @@ namespace build_test
                         {
                             var next = element.XPathSelectElements(prop.Name).ToList();
 
-                            next.Count().Should().Be(1, $"Expected exactly one result for xpath: {prop.Name} at {GetPath()}");
-                            AssertImpl(next[0], prop.Value);    
+                            next.Count().Should().Be(1,
+                                $"Expected exactly one result for xpath: {prop.Name} at {GetPath()}");
+                            AssertImpl(next[0], prop.Value);
                         }
 
                         _path.Pop();
                     }
+
                     break;
                 default:
                     throw new NotImplementedException(token.Type.ToString());
@@ -147,6 +149,7 @@ namespace build_test
                             throw new NotImplementedException(found.ToString());
                             break;
                     }
+
                     break;
                 default:
                     throw new NotImplementedException(value.ToString());

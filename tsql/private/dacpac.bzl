@@ -21,11 +21,12 @@ def tsql_dacpac_macro(name, extract_args = [], **kwargs):
             "--output_directory",
             native.package_name(),
         ] + extract_args,
-        deps = [],
-        data = ["@rules_tsql//tsql/tools/builder"],
+        deps = ["@bazel_tools//tools/bash/runfiles"],
+        data = ["@rules_tsql//tsql/tools/builder:builder_tool"],
     )
 
 def _dacpac_impl(ctx):
+    toolchain = ctx.toolchains["@rules_tsql//tsql:toolchain_type"]
     dacpac = ctx.actions.declare_file(ctx.attr.name + ".dacpac")
     model_xml = ctx.actions.declare_file("_%s/Model.xml" % ctx.attr.name)
 
@@ -59,12 +60,22 @@ def _dacpac_impl(ctx):
     args.add("--srcs")
     args.add_all(ctx.files.srcs)
 
-    #    args.add(",".join([f.path for f in ctx.files.srcs]))
+    basename = toolchain.builder.executable.path
+    if basename.endswith(".exe"):
+        basename = basename[:-4]
+
+    runfiles_dir = basename + ".dll.runfiles"
+
     ctx.actions.run(
         mnemonic = "CompileDacpac",
-        inputs = inputs,
+        inputs = depset(inputs, transitive = [toolchain.builder.files]),
         outputs = [dacpac, model_xml],
-        executable = ctx.executable._builder,
+        executable = toolchain.builder.executable,
+        env = {
+            "DOTNET_CLI_HOME": toolchain.dotnet_runtime.cli_home,
+            "DOTNET_RUNTIME_BIN": toolchain.dotnet_runtime.dotnet,
+            "RUNFILES_DIR": runfiles_dir,
+        },
         arguments = [args],
     )
     return [
@@ -146,8 +157,8 @@ properties = {
             doc = """List of dacpacs that this dacpac depends on.""",
             providers = [DacpacInfo],
         ),
-        "_builder": BUILDER,
     },
+    toolchains = ["@rules_tsql//tsql:toolchain_type"],
 )
 
 tsql_unpack = rule(

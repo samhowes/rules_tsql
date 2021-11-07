@@ -9,13 +9,21 @@ git_repository(
     shallow_since = "1629300223 -0400",
 )
 
+load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
+
+rules_tsql_dependencies()
+
+load("@rules_tsql//tsql:defs.bzl", "tsql_register_toolchains")
+
+tsql_register_toolchains()
+
 # bzl:generated start
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_msbuild",
-    sha256 = "607a251ed80ef195c85edd95689df96e7aae97911bbbf0be1884594d32d8472a",
-    urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.10/rules_msbuild-0.0.10.tar.gz"],
+    sha256 = "f8b673947ab14bdfab026ef8bdc88fe5f2d645bc15636f780e3e460c974314f1",
+    urls = ["https://github.com/samhowes/rules_msbuild/releases/download/0.0.15/rules_msbuild-0.0.15.tar.gz"],
 )
 
 load("@rules_msbuild//dotnet:deps.bzl", "msbuild_register_toolchains", "msbuild_rules_dependencies")
@@ -30,7 +38,4 @@ msbuild_register_toolchains(version = "host")
 load("//deps:nuget.bzl", "nuget_deps")
 
 # gazelle:nuget_macro deps:nuget.bzl%nuget_deps
-nuget_deps()
-
-# gazelle:nuget_macro deps/nuget.bzl%nuget_deps
 nuget_deps()

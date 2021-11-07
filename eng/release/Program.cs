@@ -54,6 +54,7 @@ namespace release
 
             if (_action == Action.Release)
             {
+                UpdateVersion();
                 Info("Creating release...");
                 Run($"gh release create {_version} ",
                     "--prerelease",
@@ -97,6 +98,14 @@ namespace release
             // }
 
             await File.WriteAllTextAsync(releaseNotes, notes.ToString());
+        }
+
+        private static void UpdateVersion()
+        {
+            var versionParts = _version.Split(".").Select(int.Parse).ToArray();
+            versionParts[^1]++;
+            var newString = string.Join(".", versionParts);
+            File.WriteAllText(Path.Combine(_root, "version.bzl"), $"VERSION = \"{newString}\"");
         }
 
         private static void Setup(string[] args)

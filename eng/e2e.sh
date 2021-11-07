@@ -14,6 +14,9 @@ tarsha="$(cat bazel-bin/rules_tsql.tar.gz.sha256)"
 
 pushd tmp
 tarpath="$(pwd)/rules_tsql.tar.gz"
+if [[ "$(uname -s)" == *"NT"* ]]; then
+  tarpath="$(cygpath -w "$tarpath")";
+fi;
 cat >>WORKSPACE <<EOF
 workspace(name = "rules_tsql_test")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")

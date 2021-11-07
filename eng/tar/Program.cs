@@ -69,12 +69,12 @@ namespace tar
                 if (Path.GetFileName(actual) == _outputName) continue;
 
                 var tarValue = actual;
-                actual = Path.Combine(_root, actual);
+                actual = sPath.Combine(_root, actual);
                 var match = ReleaseRegex.Match(actual);
                 if (match.Success)
                 {
                     tarValue = match.Groups["name"].Value + match.Groups["ext"].Value;
-                    tarValue = Path.GetRelativePath(_root, tarValue);
+                    tarValue = Path.GetRelativePath(_root, tarValue).Replace("\\", "/");
                 }
                 else
                 {

@@ -14,5 +14,12 @@ filegroup(
 builder(
     name = "builder_publish",
     files = ":prebuilt_builder",
-    launcher = "builder.bash",
+    launcher = "prebuilt/builder",
+    launcher_windows = "prebuilt/builder.exe",
+)
+
+alias(
+    name = "builder_tool",
+    actual = ":builder_publish",
+    visibility = ["//visibility:public"],
 )

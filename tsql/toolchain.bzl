@@ -2,11 +2,12 @@ load("@rules_dotnet_runtime//dotnet:defs.bzl", "DotnetPublishInfo", "DotnetRunti
 
 def _impl(ctx):
     info = ctx.attr.builder[DotnetPublishInfo]
+    executable = info.launcher if ctx.configuration.host_path_separator == ":" else info.launcher_windows
 
     return [platform_common.ToolchainInfo(
         builder = struct(
             files = info.files,
-            executable = info.launcher,
+            executable = executable,
         ),
         dotnet_runtime = ctx.attr.dotnet_runtime[DotnetRuntimeInfo],
     )]

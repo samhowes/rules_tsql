@@ -22,3 +22,9 @@ msbuild_binary(
         "@nuget//RulesMSBuild.Runfiles",
     ],
 )
+
+alias(
+    name = "builder_tool",
+    actual = ":builder",
+    visibility = ["//visibility:public"],
+)

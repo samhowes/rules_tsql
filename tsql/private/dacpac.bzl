@@ -22,7 +22,7 @@ def tsql_dacpac_macro(name, extract_args = [], **kwargs):
             native.package_name(),
         ] + extract_args,
         deps = ["@bazel_tools//tools/bash/runfiles"],
-        data = ["@rules_tsql//tsql/tools/builder"],
+        data = ["@rules_tsql//tsql/tools/builder:builder_tool"],
     )
 
 def _dacpac_impl(ctx):
@@ -60,7 +60,6 @@ def _dacpac_impl(ctx):
     args.add("--srcs")
     args.add_all(ctx.files.srcs)
 
-    #    args.add(",".join([f.path for f in ctx.files.srcs]))
     ctx.actions.run(
         mnemonic = "CompileDacpac",
         inputs = depset(inputs, transitive = [toolchain.builder.files]),

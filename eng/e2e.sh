@@ -45,5 +45,22 @@ EOF
 
 bazel sync --only rules_tsql
 
+export RULES_TSQL_TESTING=1
 bazel build //:foo
+actual="$(bazel run //:foo.extract)"
+
+suffix=""
+if [[ "$(uname -s)" == *"NT"* ]]; then suffix=".exe"; fi;
+
+expected="external/rules_tsql/tsql/tools/builder/prebuilt/builder$suffix extract --database_name foo --output_directory"
+
+if [[ "$actual" != *"$expected"* ]]; then
+  echo "unexpected result"
+  echo "    expected: $expected"
+  echo "    actual: $actual"
+  exit 1
+fi
+
+echo "SUCCESS"
+
 

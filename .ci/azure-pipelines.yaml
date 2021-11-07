@@ -44,8 +44,9 @@ jobs:
             env:
               BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
 
-          - script: |
+          - bash: |
               bazel test //...
+              eng/e2e.sh
             displayName: 'Build & Test'
 
 #          - script: |

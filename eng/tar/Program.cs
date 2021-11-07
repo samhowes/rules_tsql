@@ -179,7 +179,7 @@ namespace tar
                 foreach (var file in Directory.EnumerateFiles(path))
                 {
                     var rel = string.Join("/", "prebuilt", file[(publishDir.Length + 1)..]);
-                    list.Add(rel);
+                    list.Add(rel.Replace("\\", "/"));
                     files[string.Join('/', "tsql/tools/builder", rel)] = file;
                 }
             }

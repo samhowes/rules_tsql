@@ -60,7 +60,7 @@ def _dacpac_impl(ctx):
     args.add("--srcs")
     args.add_all(ctx.files.srcs)
 
-    basename = toolchain.builder.executable.realpath
+    basename = toolchain.builder.executable.path
     if basename.endswith(".exe"):
         basename = basename[:-4]
 

@@ -15,7 +15,7 @@ tarsha="$(cat bazel-bin/rules_tsql.tar.gz.sha256)"
 pushd tmp
 tarpath="$(pwd)/rules_tsql.tar.gz"
 if [[ "$(uname -s)" == *"NT"* ]]; then
-  tarpath="$(cygpath -w "$tarpath")";
+  tarpath="$(cygpath -m "$tarpath")";
 fi;
 cat >>WORKSPACE <<EOF
 workspace(name = "rules_tsql_test")

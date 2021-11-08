@@ -4,7 +4,10 @@ load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_msbuild//dotnet:defs.bzl", "msbuild_directory")
 load("@rules_msbuild//tools:gazelle.bzl", "gazelle")
 
-msbuild_directory(name = "msbuild_defaults")
+msbuild_directory(
+    name = "msbuild_defaults",
+    visibility = ["//visibility:public"],
+)
 
 gazelle(
     name = "gazelle",

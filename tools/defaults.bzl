@@ -1,6 +1,7 @@
 load("@rules_tsql//tsql:defs.bzl", _tsql_dacpac = "tsql_dacpac")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 
-DOCKER_SERVER = "localhost"
+DOCKER_SERVER = shell.quote("(localdb)\\mssqllocaldb")
 DOCKER_USER = "sa"
 DOCKER_PASSWORD = "Password1234!"
 
@@ -16,7 +17,7 @@ def tsql_dacpac(name, extract_args = [], **kwargs):
             DOCKER_PASSWORD,
             "--mode",
             "Schema",
-            "--delete",
+            #            "--delete",
         ] + extract_args,
         **kwargs
     )

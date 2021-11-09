@@ -15,6 +15,7 @@ def tsql_dacpac_macro(name, extract_args = [], **kwargs):
         name = name + ".extract",
         srcs = ["@rules_tsql//tsql/tools/builder:script.sh"],
         args = [
+            "rules_tsql/$(location @rules_tsql//tsql/tools/builder:builder_tool)",
             "extract",
             "--database_name",
             name,

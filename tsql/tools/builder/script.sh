@@ -11,10 +11,11 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
  { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v2 ---
 
-set -euo pipefail
+set -eo pipefail
+set +u
 suffix=""
 if [[ "$(uname -s)" == *"NT"* ]]; then suffix=".exe"; fi;
-rpath="rules_tsql/tsql/tools/builder/prebuilt/builder$suffix"
+rpath="$1$suffix"
 builder="$(rlocation "$rpath")"
 if [[ -z "$builder" ]]; then
   echo "failed to find builder in runfiles at: $rpath"
@@ -27,4 +28,4 @@ if [[ -n "$RULES_TSQL_TESTING" ]]; then
 fi;
 
 cd "$BUILD_WORKSPACE_DIRECTORY"
-$execute "${@:1}"
+$execute "${@:2}"

@@ -1,11 +1,13 @@
 # rules_tsql
+
 TSQL Rules for Bazel
 
-| Windows                                                                                                                                                                                                                                                  | Mac                                                                                                                                                                                                                                              | Linux                                                                                                                                                                                                                                                |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows                                                                                                                                                                                                                                           | Mac                                                                                                                                                                                                                                       | Linux                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [![Build Status](https://dev.azure.com/samhowes/rules_msbuild/_apis/build/status/samhowes.rules_tsql?branchName=main&jobName=windows)](https://dev.azure.com/samhowes/rules_msbuild/_build/latest?definitionId=8&branchName=main&jobName=windows) | [![Build Status](https://dev.azure.com/samhowes/rules_msbuild/_apis/build/status/samhowes.rules_tsql?branchName=main&jobName=mac)](https://dev.azure.com/samhowes/rules_msbuild/_build/latest?definitionId=8&branchName=main&jobName=mac) | [![Build Status](https://dev.azure.com/samhowes/rules_msbuild/_apis/build/status/samhowes.rules_tsql?branchName=main&jobName=linux)](https://dev.azure.com/samhowes/rules_msbuild/_build/latest?definitionId=8&branchName=main&jobName=linux) |
 
 ## Build Rules
+
 ```python
 load("@rules_tsql//tsql:defs.bzl", "tsql_dacpac")
 
@@ -28,23 +30,26 @@ tsql_dacpac(
 ```shell script
 bazel build //my_db                                 # compiles my_db.dacpac
 bazel run //my_db:my_db.deploy  --server localhost  # deploys my_db.dacpac to localhost.my_db
-bazel run //my_db:my_db.extract --server localhost  # extracts my_db to sql files on disk 
+bazel run //my_db:my_db.extract --server localhost  # extracts my_db to sql files on disk
 ```
 
 ## Features
+
 1. Compile a DACPAC on any platform
 2. No Visual Studio Build tools dependencies
 3. Compile Dacpacs with references to other dacpacs
-4. MSBuild .sqlproj feature parity 
+4. MSBuild .sqlproj feature parity
 
 ## Usage
+
 WORKSPACE
+
 ```python
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_tsql",
-    sha256 = "9161b722f3af19860f24ae147fbe6d1ac2b089b5242dfdde18893e31c6830d83",
-    urls = ["https://github.com/samhowes/rules_tsql/releases/download/0.0.2/rules_tsql-0.0.2.tar.gz"],
+    sha256 = "11d38b620be9b6eba6a11be1f4bc96b13aa84b55583bbe72ad354d5476c73463",
+    urls = ["https://github.com/samhowes/rules_tsql/releases/download/0.0.3/rules_tsql-0.0.3.tar.gz"],
 )
 load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
 rules_tsql_dependencies()
@@ -55,4 +60,5 @@ tsql_register_toolchains()
 See `//tests/examples` for more usage examples
 
 ## Details
+
 Compilation is done using [SqlBuildTask](https://docs.microsoft.com/en-us/dotnet/api/microsoft.data.tools.schema.tasks.sql.sqlbuildtask?view=sql-datatools-msbuild-16) from [Microsoft.Data.Tools.Schema.Tasks.Sql.dll](https://docs.microsoft.com/en-us/dotnet/api/microsoft.data.tools.schema.tasks.sql?view=sql-datatools-msbuild-16) available via the [DacFx package](https://www.nuget.org/packages/Microsoft.SqlServer.DacFx/150.5290.2-preview) (preview versions have the Tasks dll).

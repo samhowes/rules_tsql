@@ -25,6 +25,12 @@ tsql_dacpac(
 
 ```
 
+```shell script
+bazel build //my_db                                 # compiles my_db.dacpac
+bazel run //my_db:my_db.deploy  --server localhost  # deploys my_db.dacpac to localhost.my_db
+bazel run //my_db:my_db.extract --server localhost  # extracts my_db to sql files on disk 
+```
+
 ## Features
 1. Compile a DACPAC on any platform
 2. No Visual Studio Build tools dependencies

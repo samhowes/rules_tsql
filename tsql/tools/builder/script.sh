@@ -13,19 +13,29 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 
 set -eo pipefail
 set +u
-suffix=""
-if [[ "$(uname -s)" == *"NT"* ]]; then suffix=".exe"; fi;
-rpath="$1$suffix"
-builder="$(rlocation "$rpath")"
-if [[ -z "$builder" ]]; then
-  echo "failed to find builder in runfiles at: $rpath"
-  exit 1
-fi;
+function required_rlocation() {
+    p="$1"
+    rp="$(rlocation "$p")"
+    if [[ -z "$rp" ]]; then
+      echo 2> "failed to find required runfiles item: $p"
+      exit 1
+    fi;
+    echo "$rp"
+}
+
+builder="$(required_rlocation "@@builder@@")"
 
 execute="$builder"
 if [[ -n "$RULES_TSQL_TESTING" ]]; then
   execute="echo $builder"
 fi;
+args=@@args@@
+runfiles_args=@@runfiles_args@@
+
+for i in "${!runfiles_args[@]}"; do
+  if [[ "${runfiles_args[$i]}" == "--"* ]]; then continue; fi
+  runfiles_args[$i]="$(required_rlocation "${runfiles_args[$i]}")"
+done
 
 cd "$BUILD_WORKSPACE_DIRECTORY"
-$execute "${@:2}"
+$execute "${args[@]}" "${runfiles_args[@]}"

@@ -10,42 +10,17 @@ namespace builder
     {
         private readonly ExtractArgs _args;
         private string _workDirectory;
+        private readonly TaskUtil _taskUtil;
 
-        public Extractor(ExtractArgs args)
+        public Extractor(ExtractArgs args, TaskUtil taskUtil)
         {
             _args = args;
+            _taskUtil = taskUtil;
         }
 
         public int Extract()
         {
-            var connectionString = new SqlConnectionStringBuilder(_args.ConnectionString ?? "");
-            if (!string.IsNullOrEmpty(_args.DatabaseName))
-            {
-                connectionString.InitialCatalog = _args.DatabaseName;
-            }
-            else if (string.IsNullOrEmpty(connectionString.InitialCatalog))
-            {
-                Console.WriteLine("Either --database_name must be provided or Initial Catalog must be specified in " +
-                                  "--connection_string");
-                return 1;
-            }
-
-            if (!string.IsNullOrEmpty(_args.Server))
-            {
-                connectionString.DataSource = _args.Server;
-            }
-
-            connectionString.DataSource ??= "localhost";
-
-            if (!string.IsNullOrEmpty(_args.Username))
-            {
-                connectionString.UserID = _args.Username;
-            }
-
-            if (!string.IsNullOrEmpty(_args.Password))
-            {
-                connectionString.Password = _args.Password;
-            }
+            if (!_args.TryGetConnectionString(out var connectionString)) return 1;
 
             if (_args.TargetPath == null)
             {
@@ -56,9 +31,6 @@ namespace builder
                 _args.TargetPath = Path.GetFullPath(_args.TargetPath);
             }
 
-            Console.WriteLine(
-                $"Using connection string: `{connectionString.ToString().Replace(_args.Password ?? "", "***")}`");
-
             var services = new DacServices(connectionString.ToString());
 
             _workDirectory = Path.GetFullPath(Path.Combine(_args.TargetPath, "_work"));
@@ -66,12 +38,12 @@ namespace builder
                 Directory.Delete(_workDirectory, true);
             Directory.CreateDirectory(_workDirectory);
 
+            var options = new DacExtractOptions();
+            _taskUtil.SetProperties(options, _args.PropertiesFile);
+            options.ExtractTarget = _args.Mode;
             services.Extract(_workDirectory, _args.DatabaseName, "bazel", Version.Parse("0.0.1"),
                 tables: null,
-                extractOptions: new DacExtractOptions()
-                {
-                    ExtractTarget = _args.Mode,
-                });
+                extractOptions: options);
 
             if (_args.Delete)
                 CleanFiles(_args.TargetPath);

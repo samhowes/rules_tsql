@@ -1,10 +1,8 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Data.Tools.Schema.Extensibility;
@@ -14,15 +12,17 @@ using RulesMSBuild.Tools.Bazel;
 
 namespace builder
 {
-    public class MSBuildBuilder
+    public class Builder
     {
         private readonly BuildArgs _args;
         private readonly BuildOptions _options;
+        private TaskUtil _taskUtil;
 
-        public MSBuildBuilder(BuildArgs args, BuildOptions options)
+        public Builder(BuildArgs args, BuildOptions options, TaskUtil taskUtil)
         {
             _args = args;
             _options = options;
+            _taskUtil = taskUtil;
         }
 
         public bool Build()
@@ -40,15 +40,7 @@ namespace builder
             var label = new Label(_args.Label);
 
             var outputDirectory = Path.GetDirectoryName(_args.Output);
-            var buildTask = new SqlBuildTask()
-            {
-                IntermediateDirectory = Path.Combine(outputDirectory!, "_" + label.Name),
-                OutputDirectory = outputDirectory,
-                BuildEngine = new MSBuildEngine(Directory.GetCurrentDirectory()),
-                DatabaseSchemaProviderName = schemaProvider.FullName,
-                Source = _args.Srcs.Select(s => (ITaskItem) new TaskItem(s)).ToArray(),
-                SqlTarget = new TaskItem(_args.Output)
-            };
+            var buildTask = new SqlBuildTask();
 
             var deps = _args.Deps?.ToList();
             if (deps?.Any() == true)
@@ -68,59 +60,23 @@ namespace builder
                     }).ToArray();
             }
 
+
+            if (!_taskUtil.SetProperties(buildTask, _args.PropertiesFile)) return false;
+
+            buildTask.IntermediateDirectory = Path.Combine(outputDirectory!, "_" + label.Name);
+            buildTask.OutputDirectory = outputDirectory;
+            buildTask.DatabaseSchemaProviderName = schemaProvider.FullName;
+            buildTask.Source = _args.Srcs.Select(s => (ITaskItem) new TaskItem(s)).ToArray();
+            buildTask.SqlTarget = new TaskItem(_args.Output);
+
             if (Directory.Exists(buildTask.IntermediateDirectory))
                 Directory.Delete(buildTask.IntermediateDirectory);
             Directory.CreateDirectory(buildTask.IntermediateDirectory);
 
-            if (!string.IsNullOrEmpty(_args.PropertiesFile))
-            {
-                if (!SetProperties(buildTask))
-                    return false;
-            }
-
-            var result = buildTask.Execute();
-            if (!result)
+            if (!_taskUtil.ExecuteTask(buildTask))
             {
                 Console.WriteLine("Compile dacpac FAILED");
-            }
-
-            return result;
-        }
-
-        private bool SetProperties(SqlBuildTask buildTask)
-        {
-            var dict =
-                JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(_args.PropertiesFile));
-
-            var properties = typeof(SqlBuildTask).GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
-
-            foreach (var (name, value) in dict!)
-            {
-                if (!properties.TryGetValue(name, out var property))
-                {
-                    Console.WriteLine($"Property `{name}` does not exist on {nameof(SqlBuildTask)}.");
-                    return false;
-                }
-
-                if (property.GetValue(buildTask) != null) continue;
-
-                var type = property.PropertyType;
-                object propertyValue = null;
-                if (type == typeof(string))
-                {
-                    propertyValue = value;
-                }
-                else if (type == typeof(TaskItem[]))
-                {
-                    propertyValue = value.Split(",").Select(v => new TaskItem(v));
-                }
-                else
-                {
-                    Console.WriteLine($"Warning: unknown property type '{type.Name}', can't set property '{name}'");
-                }
-
-                property.SetValue(buildTask, propertyValue);
+                return false;
             }
 
             return true;

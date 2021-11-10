@@ -21,7 +21,7 @@ def tsql_dacpac_macro(
     )
 
     tsql_extract(
-        name = name + ".extract",
+        name = name + ".extract.sh",
         builder_args = [
             "--database_name",
             name,
@@ -30,15 +30,23 @@ def tsql_dacpac_macro(
         ] + connection_args + extract_args,
         properties = extract_properties,
     )
+    native.sh_binary(
+        name = name + ".extract",
+        srcs = [name + ".extract.sh"],
+    )
 
     tsql_deploy(
-        name = name + ".deploy",
+        name = name + ".deploy.sh",
         dacpac = ":" + name,
         builder_args = [
             "--database_name",
             name,
         ] + connection_args + deploy_args,
         properties = deploy_properties,
+    )
+    native.sh_binary(
+        name = name + ".deploy",
+        srcs = [name + ".deploy.sh"],
     )
 
 def _extract_impl(ctx):

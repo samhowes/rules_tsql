@@ -8,5 +8,8 @@ msbuild_binary(
     ],
     target_framework = "net5.0",
     visibility = ["//visibility:public"],
-    deps = ["@nuget//Newtonsoft.Json"],
+    deps = [
+        "@nuget//Newtonsoft.Json",
+        "@nuget//RulesMSBuild.Runfiles",
+    ],
 )

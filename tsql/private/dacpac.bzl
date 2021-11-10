@@ -1,6 +1,15 @@
 load(":providers.bzl", "DacpacInfo")
+load(":util.bzl", "to_manifest_path")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 
-def tsql_dacpac_macro(name, extract_args = [], **kwargs):
+def tsql_dacpac_macro(
+        name,
+        connection_args = [],
+        deploy_args = [],
+        deploy_properties = {},
+        extract_args = [],
+        extract_properties = {},
+        **kwargs):
     tsql_dacpac(
         name = name,
         **kwargs
@@ -11,19 +20,70 @@ def tsql_dacpac_macro(name, extract_args = [], **kwargs):
         dacpac = ":" + name,
     )
 
-    native.sh_binary(
-        name = name + ".extract",
-        srcs = ["@rules_tsql//tsql/tools/builder:script.sh"],
-        args = [
-            "extract",
+    tsql_extract(
+        name = name + ".extract.sh",
+        builder_args = [
             "--database_name",
             name,
             "--output_directory",
             native.package_name(),
-        ] + extract_args,
-        deps = ["@bazel_tools//tools/bash/runfiles"],
-        data = ["@rules_tsql//tsql/tools/builder:builder_tool"],
+        ] + connection_args + extract_args,
+        properties = extract_properties,
     )
+    native.sh_binary(
+        name = name + ".extract",
+        srcs = [name + ".extract.sh"],
+    )
+
+    tsql_deploy(
+        name = name + ".deploy.sh",
+        dacpac = ":" + name,
+        builder_args = [
+            "--database_name",
+            name,
+        ] + connection_args + deploy_args,
+        properties = deploy_properties,
+    )
+    native.sh_binary(
+        name = name + ".deploy",
+        srcs = [name + ".deploy.sh"],
+    )
+
+def _extract_impl(ctx):
+    return _util_script(ctx, "extract", [], [])
+
+def _deploy_impl(ctx):
+    dacpac = ctx.attr.dacpac[DacpacInfo].dacpac
+    return _util_script(ctx, "deploy", [
+        "--dacpac",
+        to_manifest_path(ctx, dacpac),
+    ], [dacpac])
+
+def _util_script(ctx, action, runfiles_args, runfiles):
+    toolchain = ctx.toolchains["@rules_tsql//tsql:toolchain_type"]
+    script = ctx.actions.declare_file(ctx.attr.name)
+    pinputs, pargs = _add_properties(ctx, True)
+
+    ctx.actions.expand_template(
+        template = ctx.file._script_template,
+        output = script,
+        substitutions = {
+            "@@builder@@": to_manifest_path(ctx, toolchain.builder.executable),
+            "@@args@@": shell.array_literal([action] + ctx.attr.builder_args),
+            "@@runfiles_args@@": shell.array_literal(runfiles_args + pargs),
+        },
+        is_executable = True,
+    )
+
+    return [DefaultInfo(
+        files = depset([script]),
+        runfiles = ctx.runfiles(files = [
+            script,
+            toolchain.builder.executable,
+            ctx.file._runfiles,
+        ] + pinputs + runfiles),
+        executable = script,
+    )]
 
 def _dacpac_impl(ctx):
     toolchain = ctx.toolchains["@rules_tsql//tsql:toolchain_type"]
@@ -43,15 +103,9 @@ def _dacpac_impl(ctx):
 
     inputs = ctx.files.srcs + deps
 
-    properties = getattr(ctx.attr, "properties", None)
-    if properties:
-        properties_file = ctx.actions.declare_file(ctx.attr.name + ".properties.json")
-        inputs.append(properties_file)
-        ctx.actions.write(properties_file, json.encode(properties))
-        args.add_all([
-            "--properties_file",
-            properties_file,
-        ])
+    pinputs, pargs = _add_properties(ctx, False)
+    args.add_all(pargs)
+    inputs.extend(pinputs)
 
     if len(deps) > 0:
         args.add("--deps")
@@ -90,6 +144,17 @@ def _dacpac_impl(ctx):
             all = [dacpac, model_xml],
         ),
     ]
+
+def _add_properties(ctx, use_manifest_path):
+    properties = getattr(ctx.attr, "properties", None)
+    if not properties:
+        return ([], [])
+    properties_file = ctx.actions.declare_file(ctx.attr.name + ".properties.json")
+    ctx.actions.write(properties_file, json.encode_indent(properties))
+    return ([properties_file], [
+        "--properties_file",
+        to_manifest_path(ctx, properties_file) if use_manifest_path else properties_file,
+    ])
 
 def _unpack_impl(ctx):
     dacpac = ctx.attr.dacpac[DacpacInfo].dacpac
@@ -170,4 +235,31 @@ tsql_unpack = rule(
         ),
         "_builder": BUILDER,
     },
+)
+
+tsql_extract = rule(
+    _extract_impl,
+    attrs = {
+        "builder_args": attr.string_list(),
+        "properties": attr.string_dict(),
+        "_script_template": attr.label(default = "@rules_tsql//tsql/tools/builder:script.sh", allow_single_file = True),
+        "_runfiles": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
+    },
+    toolchains = ["@rules_tsql//tsql:toolchain_type"],
+    executable = True,
+)
+tsql_deploy = rule(
+    _deploy_impl,
+    attrs = {
+        "builder_args": attr.string_list(),
+        "dacpac": attr.label(
+            mandatory = True,
+            providers = [DacpacInfo],
+        ),
+        "properties": attr.string_dict(),
+        "_script_template": attr.label(default = "@rules_tsql//tsql/tools/builder:script.sh", allow_single_file = True),
+        "_runfiles": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
+    },
+    toolchains = ["@rules_tsql//tsql:toolchain_type"],
+    executable = True,
 )

@@ -5,13 +5,13 @@ exports_files(["script.sh"])
 msbuild_binary(
     name = "builder",
     srcs = [
+        "BuildArgs.cs",
         "Builder.cs",
+        "Deployer.cs",
         "Extractor.cs",
         "MSBuildEngine.cs",
-        "ModelValidationError.cs",
         "Program.cs",
-        "SimpleBuilder.cs",
-        "TSqlModelExtensions.cs",
+        "TaskUtil.cs",
     ],
     target_framework = "net5.0",
     visibility = ["//visibility:public"],

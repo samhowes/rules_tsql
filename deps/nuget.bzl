@@ -1,6 +1,5 @@
 load("@rules_msbuild//deps:public_nuget.bzl", "FRAMEWORKS", "PACKAGES")
 load("@rules_msbuild//dotnet:defs.bzl", "nuget_deps_helper", "nuget_fetch")
-load(":public.nuget.bzl", "TSQL_FRAMEWORKS", "TSQL_PACKAGES")
 
 def nuget_deps():
     nuget_fetch(

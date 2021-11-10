@@ -46,7 +46,7 @@ namespace release
             var usage = $@"http_archive(
     name = ""rules_tsql"",
     sha256 = ""{tarSha}"",
-    ulrs = [""{url}""],
+    urls = [""{url}""],
 )
 ";
             

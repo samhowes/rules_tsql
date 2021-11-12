@@ -109,7 +109,7 @@ def _dacpac_impl(ctx):
 
     if len(deps) > 0:
         args.add("--deps")
-        args.add(",".join([d.path for d in deps]))
+        args.add_all(deps)
 
     args.add("--srcs")
     args.add_all(ctx.files.srcs)

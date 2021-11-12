@@ -28,16 +28,6 @@ namespace builder
         public string PropertiesFile { get; set; }
     }
 
-    [Verb("unpack")]
-    public class UnpackArgs
-    {
-        [Option("output", Required = true)]
-        public string Output { get; set; }
-
-        [Option("dacpac", Required = true)]
-        public string Dacpac { get; set; }
-    }
-
     public abstract class ConnectedArgs
     {
         [Option('d', "database_name")]

@@ -15,11 +15,6 @@ def tsql_dacpac_macro(
         **kwargs
     )
 
-    tsql_unpack(
-        name = name + ".unpack",
-        dacpac = ":" + name,
-    )
-
     tsql_extract(
         name = name + ".extract.sh",
         builder_args = [
@@ -156,42 +151,6 @@ def _add_properties(ctx, use_manifest_path):
         to_manifest_path(ctx, properties_file) if use_manifest_path else properties_file,
     ])
 
-def _unpack_impl(ctx):
-    dacpac = ctx.attr.dacpac[DacpacInfo].dacpac
-    model_xml = ctx.actions.declare_file(
-        dacpac.basename.rsplit(".", 1)[0] + ".model.xml",
-    )
-
-    args = ctx.actions.args()
-    args.add_all([
-        "unpack",
-        "--output=" + model_xml.path,
-        "--dacpac=" + dacpac.path,
-    ])
-
-    ctx.actions.run(
-        mnemonic = "ExtractDacpac",
-        inputs = [dacpac],
-        outputs = [model_xml],
-        executable = ctx.executable._builder,
-        arguments = [args],
-    )
-
-    return [
-        DefaultInfo(
-            files = depset([model_xml]),
-            runfiles = ctx.runfiles(
-                files = [model_xml],
-            ),
-        ),
-    ]
-
-BUILDER = attr.label(
-    executable = True,
-    cfg = "exec",
-    default = "@rules_tsql//tsql/tools/builder",
-)
-
 tsql_dacpac = rule(
     _dacpac_impl,
     attrs = {
@@ -224,17 +183,6 @@ properties = {
         ),
     },
     toolchains = ["@rules_tsql//tsql:toolchain_type"],
-)
-
-tsql_unpack = rule(
-    _unpack_impl,
-    attrs = {
-        "dacpac": attr.label(
-            mandatory = True,
-            providers = [DacpacInfo],
-        ),
-        "_builder": BUILDER,
-    },
 )
 
 tsql_extract = rule(

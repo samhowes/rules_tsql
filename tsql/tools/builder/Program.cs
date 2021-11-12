@@ -21,7 +21,7 @@ namespace builder
                 settings.HelpWriter = null;
             });
 
-            var result = parser.ParseArguments<BuildArgs, UnpackArgs, ExtractArgs, DeployArgs>(args);
+            var result = parser.ParseArguments<BuildArgs, ExtractArgs, DeployArgs>(args);
             if (result.Tag == ParserResultType.NotParsed)
             {
                 var helpText = HelpText.AutoBuild(result, h =>
@@ -39,7 +39,6 @@ namespace builder
 
             return result.MapResult(
                 (BuildArgs typedArgs) => Build(typedArgs),
-                (UnpackArgs typedArgs) => Unpack(typedArgs),
                 (ExtractArgs typedArgs) => Extract(typedArgs),
                 (DeployArgs typedArgs) => Deploy(typedArgs),
                 errors => 1);
@@ -63,28 +62,6 @@ namespace builder
         {
             var extractor = new Extractor(args, new TaskUtil());
             return extractor.Extract();
-        }
-
-        private static int Unpack(UnpackArgs args)
-        {
-            var zip = ZipFile.OpenRead(args.Dacpac);
-            var files = new Dictionary<string, ZipArchiveEntry>();
-            foreach (var entry in zip.Entries)
-            {
-                files[entry.FullName] = entry;
-            }
-
-            if (!files.TryGetValue("model.xml", out var modelXml))
-            {
-                Console.WriteLine("Invalid Dacpac: model.xml not found.");
-                return 1;
-            }
-
-            using var output = File.Create(args.Output);
-            using var input = modelXml.Open();
-            input.CopyTo(output);
-            output.Flush();
-            return 0;
         }
     }
 

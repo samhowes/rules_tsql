@@ -44,18 +44,20 @@ bazel run //my_db:my_db.extract --server localhost  # extracts my_db to sql file
 
 WORKSPACE
 
+<!-- rules_tsql:snippet start -->
 ```python
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_tsql",
-    sha256 = "6238bb3b4669f11467249d4bf35094f22247564ff28212864b319f780d61f3ea",
-    urls = ["https://github.com/samhowes/rules_tsql/releases/download/0.0.4/rules_tsql-0.0.4.tar.gz"],
+    sha256 = "e3adf6a43a6c83346535289d8d4b829123a5cf1fca56e82f884ee30c985c3c9a",
+    url = "https://github.com/samhowes/rules_tsql/releases/download/0.0.6/rules_tsql-0.0.6.tar.gz",
 )
 load("@rules_tsql//tsql:deps.bzl", "rules_tsql_dependencies")
 rules_tsql_dependencies()
 load("@rules_tsql//tsql:defs.bzl", "tsql_register_toolchains")
 tsql_register_toolchains()
 ```
+<!-- rules_tsql:snippet end -->
 
 See `//tests/examples` for more usage examples
 

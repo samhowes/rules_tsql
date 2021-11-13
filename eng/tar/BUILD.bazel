@@ -2,7 +2,10 @@ load("@rules_msbuild//dotnet:defs.bzl", "msbuild_binary")
 
 msbuild_binary(
     name = "tar",
-    srcs = ["Program.cs"],
+    srcs = [
+        "Program.cs",
+        "FileEditor.cs",
+    ],
     data = [
         "//tsql/tools/builder:builder_publish",
     ],

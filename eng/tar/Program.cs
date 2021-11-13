@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ICSharpCode.SharpZipLib.GZip;
@@ -43,10 +42,6 @@ namespace tar
         private static readonly Regex ReleaseRegex = new Regex(@"(?<name>.*)(\.release)(?<ext>\..*)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex PublicContentsRegex = new Regex(
-            @"\n([^\n]+?)(rules_tsql:release start)(?<public>.*?)((\n([^\n]+?)(rules_tsql:release end))|$)",
-            RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
-
         private readonly string _outputName;
         private readonly string _root;
         private List<string> _tempFiles = new();
@@ -59,7 +54,7 @@ namespace tar
 
         public async Task<int> MakeTar()
         {
-            var process = Process.Start(new ProcessStartInfo("git", "ls-files") {RedirectStandardOutput = true});
+            var process = Process.Start(new ProcessStartInfo("git", "ls-files") { RedirectStandardOutput = true });
 
             var files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             for (;;)
@@ -139,18 +134,10 @@ namespace tar
 
         private string HidePrivateContent(string actual)
         {
-            var contents = File.ReadAllText(actual);
-            var builder = new StringBuilder();
-            foreach (var match in PublicContentsRegex.Matches(contents).Cast<Match>())
-            {
-                builder.Append(match.Groups["public"].Value);
-            }
-
-            if (builder.Length == 0) return actual;
-
-            var tmp = Path.Combine(BazelEnvironment.GetTmpDir(), Guid.NewGuid().ToString());
+            var editor = new FileEditor("release");
+            if (!editor.HideOtherContent(actual, out var tmp))
+                return actual;
             _tempFiles.Add(tmp);
-            File.WriteAllText(tmp, builder.ToString());
             return tmp;
         }
 

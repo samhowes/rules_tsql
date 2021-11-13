@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RulesMSBuild.Tools.Bazel;
+using tar;
 using static release.Util;
 
 namespace release
@@ -18,6 +18,7 @@ namespace release
         Clean,
         Test,
     }
+
     class Program
     {
         private static Action _action;
@@ -40,17 +41,19 @@ namespace release
 
             var (tarAlias, tarSha) = BuildTar(_work, _version);
 
-            var url =
-                $"https://github.com/samhowes/rules_tsql/releases/download/{_version}/rules_tsql-{_version}.tar.gz";
-
-            var usage = $@"http_archive(
+            var usage = $@"```python
+load(""@bazel_tools//tools/build_defs/repo:http.bzl"", ""http_archive"")
+http_archive(
     name = ""rules_tsql"",
     sha256 = ""{tarSha}"",
-    urls = [""{url}""],
+    url = ""https://github.com/samhowes/rules_tsql/releases/download/{_version}/rules_tsql-{_version}.tar.gz"",
 )
-";
-            
-            await MakeNotes(usage);
+load(""@rules_tsql//tsql:deps.bzl"", ""rules_tsql_dependencies"")
+rules_tsql_dependencies()
+load(""@rules_tsql//tsql:defs.bzl"", ""tsql_register_toolchains"")
+tsql_register_toolchains()
+```";
+            MakeNotes(usage);
 
             if (_action == Action.Release)
             {
@@ -66,38 +69,15 @@ namespace release
 
             return 0;
         }
-        
-        private static async Task MakeNotes(string usage)
+
+        private static void MakeNotes(string usage)
         {
-            const string releaseNotes = "ReleaseNotes.md";
-            var originalNotes = await File.ReadAllTextAsync(releaseNotes);
-            const string marker = "<!--marker-->";
-            var markerIndex = originalNotes.IndexOf(marker, StringComparison.Ordinal);
-            if (markerIndex < 0) Die("Failed to find marker in release notes");
+            var fileEditor = new FileEditor("snippet");
 
-            var notes = new StringBuilder(originalNotes[..(markerIndex + marker.Length)]);
-
-            notes.AppendLine();
-            notes.AppendLine("```python");
-            notes.Append(usage);
-            notes.AppendLine("```");
-
-            // var lastRelease = RunJson<GitHubRelease>("gh release view --json");
-            // var prs = RunJson<List<GitHubPr>>(
-            //     $"gh pr list --search \"is:closed closed:>={lastRelease.CreatedAt}\" --json");
-            //
-            // notes.AppendLine("Changelog:");
-            // for (var i = 0; i < prs.Count; i++)
-            // {
-            //     var pr = prs[i];
-            //     notes.AppendLine($"{i + 1}. [PR #{pr.Number}: {pr.Title}]({pr.Url})");
-            //     var toMatch = pr.Title + pr.Body;
-            //     var closed = string.Join(", ", Regex.Matches(toMatch, @"#\d+").Select(m => m.Value));
-            //     notes.Append("  Issues: ");
-            //     notes.AppendLine(closed);
-            // }
-
-            await File.WriteAllTextAsync(releaseNotes, notes.ToString());
+            if (!fileEditor.ReplaceContent("ReleaseNotes.md", usage))
+                Die("Failed to find marker in release notes");
+            if (!fileEditor.ReplaceContent("Readme.md", usage))
+                Die("Failed to find marker in readme notes");
         }
 
         private static void UpdateVersion()
@@ -125,7 +105,7 @@ namespace release
             Info($"Work directory: {_work}");
             _root = BazelEnvironment.GetWorkspaceRoot();
             Directory.SetCurrentDirectory(_root);
-            
+
             var versionContents = File.ReadAllText(Path.Combine(_root, "version.bzl"));
             var versionMatch = Regex.Match(versionContents, @"VERSION.*?=.*?""([^""]+)""");
             if (!versionMatch.Success) Die("Failed to parse version from version.bzl");
@@ -140,7 +120,7 @@ namespace release
                 Console.WriteLine($"Removing old artifact: {file}");
                 File.Delete(file);
             }
-        
+
             var outputs = Bazel("build //:tar");
             var tarSource = outputs[0];
             var tarSha = File.ReadAllText(outputs[1]);
